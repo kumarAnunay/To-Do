@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../App.css";
 
 const ToDo = () => {
@@ -11,7 +11,9 @@ const ToDo = () => {
 
   const listHandler = () => {
     if (inputValue !== "") {
-      setList([...list, inputValue]);
+      const updatedList = [...list, inputValue];
+      setList(updatedList);
+      saveListToLocalStorage(updatedList);
     }
     setInputValue("");
   };
@@ -23,13 +25,30 @@ const ToDo = () => {
 
     if (editValue) {
       setList(editedList);
+      saveListToLocalStorage(editedList);
     }
   };
 
   const deleteHandler = (index) => {
     const updatedList = list.filter((item, i) => i !== index);
     setList(updatedList);
+    saveListToLocalStorage(updatedList);
   };
+
+  const saveListToLocalStorage = (updatedList) => {
+    localStorage.setItem("list", JSON.stringify(updatedList));
+  };
+
+  const retrieveListFromLocalStorage = () => {
+    const storedList = localStorage.getItem("list");
+    if (storedList) {
+      setList(JSON.parse(storedList));
+    }
+  };
+
+  useEffect(() => {
+    retrieveListFromLocalStorage();
+  }, []);
 
   return (
     <>
@@ -47,9 +66,8 @@ const ToDo = () => {
           <ul>
             {list.map((item, index) => {
               return (
-                <div div className="listContainer">
-                  <li key={index}>{item}</li>
-                  {"      "}
+                <div className="listContainer" key={index}>
+                  <li>{item}</li>
                   <button className="bttn" onClick={() => editHandler(index)}>
                     Edit
                   </button>
